@@ -21,10 +21,11 @@ from threading import Thread
 def download_pic(url):
     global count
     global dir_name
+    global time_out
     try:
         if(count>1000):
-            sys.exit(-1)
-        content = urllib2.urlopen(url)
+            sys.exit(-1) 
+        content = urllib2.urlopen(url,timeout = time_out)
         url_content = content.read()
         file_name = dir_name+url.split('/')[-1]
         f = open(file_name, "wb")
@@ -45,11 +46,12 @@ def download_pics(urls):
         download_pic(url)
 def get_list(url):
     global link_list
+    global headers
+    global time_out
     prog_index = re.compile('<li><a href=\"(.*?)\" target=\"_blank\">')
-    try:
-        req = urllib2.Request(url)
-        req.add_header('User-agent', 'Mozilla 5.10')
-        data = urllib2.urlopen(req).read()
+    try: 
+        req  = urllib2.Request(url = url,headers = headers)
+        data = urllib2.urlopen(req, timeout = time_out).read()  
         data = data.decode('utf-8')
         print('获取网页成功', url)
         index_items = re.findall(prog_index, data)
@@ -61,16 +63,16 @@ def get_list(url):
 
 def get_pic(url):
     global pic_list
+    global headers
+    global time_out
     prog_pic = r'<div class=\"main-image\">.*?src=\"(.*?)\".*?'
     # prog_page=re.compile('<div class=\"pagenavi\">.*?<span>(.*?)</span>')
     # prog_page = r'<div class=\"pagenavi\">.*?<span class=\'dots\'>.*?</span>.*?<span>(.*?)</span>'
     prog_page = r'<span class=\'dots\'>.*?</span>.*?<span>(.*?)</span>'
 
-    try:
-        req = urllib2.Request(url)
-        req.add_header(
-            "User-Agent", " Mozilla/5.0 (Windows NT 10.0; rv:39.0) Gecko/20100101 Firefox/39.0")
-        data = urllib2.urlopen(req).read()
+    try: 
+        req  = urllib2.Request(url = url,headers = headers)
+        data = urllib2.urlopen(req, timeout = time_out).read()  
         data = data.decode('utf-8')
         # print(data)
         print('获取网页成功', url)
@@ -115,22 +117,21 @@ def get_pic(url):
 
 
 if __name__ == '__main__':
-    MAX = 1
-    count = 0
+    MAX        = 1
+    count      = 0
+    time_out   = 60
     thread_num = 30
-    pic_list = []
-    page_list = []
-    link_list = []
-    pic_kind = ["xinggan", 'share', "japan", "mm", "taiwan", "model"]
-    dir_name = "D:/test/mzitu/"  # +rename()
+    headers    = {"User-Agent": " Mozilla/5.0 (Windows NT 10.0; rv:39.0) Gecko/20100101 Firefox/39.0"}
+    pic_list   = []
+    page_list  = []
+    link_list  = []
+    pic_kind   = ["xinggan", 'share', "japan", "mm", "taiwan", "model"]
+    dir_name   = "D:/test/mzitu/"   
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
         os.chdir(dir_name)
     start_time = time.time()
-    url_address = "http://www.mzitu.com/"
-    headers = {
-        "User-Agent": " Mozilla/5.0 (Windows NT 10.0; rv:39.0) Gecko/20100101 Firefox/39.0"}
-    # print(headers)
+    url_address = "http://www.mzitu.com/" 
     try:
         page_pool = ThreadPool(thread_num)
         for pic_i in pic_kind:
@@ -147,7 +148,7 @@ if __name__ == '__main__':
         pool.close()
         pool.join()
 
-        # 2种方式 异步抓到图就下 或者异步抓到图存到数组 然后再异步下载
+        # 3种方式 异步抓到图就下 或者异步抓到图存到数组 然后再异步下载
         # 第一种
         # print ("获取到", len(pic_list), "张图片，开始下载！") 
         # pooldown = ThreadPool(thread_num)
