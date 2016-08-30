@@ -1,4 +1,3 @@
 test
-fuck this branch
-test
-fuck this is master
+fuck this branch  
+feature1 
